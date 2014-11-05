@@ -1,0 +1,30 @@
+resource factorial()
+/*	procedure fact(v:int) returns r:int
+		if v = 1 ->
+			r := 1
+		[] v > 1 ->
+			r := v * fact(v - 1)
+		fi
+	end
+*/
+	procedure pfact(x :int; y :int) returns r:int
+		if x = y ->
+			r := x
+		[] x < y ->
+			var m :int := (x + y) / 2
+			var a, b :int
+			co a := pfact(x, m)
+			// b := pfact(m + 1, y)
+			oc
+			r := a * b
+		fi
+
+#			pfact(x, m) * pfact(m + 1)
+	end
+
+	var n:int
+	writes("Enter a positive integer:") 
+	read(n)
+#	write("the factorial or ", n, " is ", fact(n))
+	write("the factorial or ", n, " is ", pfact(1, n))
+end factorial

@@ -1,0 +1,14 @@
+resource factorial()
+	procedure fact(v:int) returns r:int
+		if v = 1 ->
+			r := 1
+		[] v > 1 ->
+			r := v * fact(v - 1)
+		fi
+	end
+
+	var n:int
+	writes("Enter a positive integer:") 
+	read(n)
+	write("the factorial or ", n, " is ", fact(n))
+end factorial

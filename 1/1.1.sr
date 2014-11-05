@@ -1,0 +1,3 @@
+resource Hello()
+	write("Hello World!")
+end Hello

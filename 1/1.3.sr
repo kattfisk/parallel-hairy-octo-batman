@@ -1,0 +1,35 @@
+resource PCproblems()
+	var n :int := 6
+	var buff :int
+	var p :int := 0, c :int := 0
+
+	process Producer
+		var a[1:n] :int := (5, 6, 7, 10, 11, 34)
+
+		fa i := 1 to n ->
+			read(a[i])
+		af
+
+		do p < n ->
+			# synchronize - wait if buffer full
+			if p = c ->
+				buff := a[++p]
+			fi
+		od
+	end
+
+	process Consume
+		var b[1:n] :int
+
+		do c < n ->
+			# synchronize - wait if buffer empty
+			if p > c ->
+				b[++c] := buff
+			fi
+		od
+		
+		fa i := 1 to n ->
+			write(b[i])
+		af
+	end
+end PCproblems
