@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>//Insert declarations of global clocks, variables, constants and channels.
+
+int[0,1] flag[2];		//Boolean array of length 2. Keeps flags for processes M0 and M1
+int turn := 1;		//Resolves potential deadlock situations
+
+urgent chan Go;		//Resolves deadlocks due to the real-time semantics in uppaal</declaration><template><name x="5" y="5">MutexP</name><parameter>const int me, const int other</parameter><declaration>//Insert local declarations of clocks, variables and constants.
+</declaration><location id="id0" x="216" y="208"><name x="168" y="200">Idle</name></location><location id="id1" x="352" y="208"><name x="376" y="200">Prepare</name></location><location id="id2" x="216" y="352"><name x="168" y="328">CS</name></location><location id="id3" x="352" y="352"><name x="376" y="344">Wait</name></location><init ref="id0"/><transition><source ref="id0"/><target ref="id1"/><label kind="synchronisation" x="248" y="184">Go !</label><label kind="assignment" x="248" y="208">flag[me] := 1</label></transition><transition><source ref="id1"/><target ref="id3"/><label kind="synchronisation" x="312" y="256">Go !</label><label kind="assignment" x="312" y="272">turn := me</label></transition><transition><source ref="id3"/><target ref="id2"/><label kind="guard" x="248" y="320">turn != me</label><label kind="synchronisation" x="248" y="336">Go !</label><nail x="320" y="320"/><nail x="248" y="320"/></transition><transition><source ref="id3"/><target ref="id2"/><label kind="guard" x="248" y="384">flag[other] == 0</label><label kind="synchronisation" x="248" y="400">Go !</label><nail x="320" y="384"/><nail x="256" y="384"/></transition><transition><source ref="id2"/><target ref="id0"/><label kind="synchronisation" x="168" y="256">Go !</label><label kind="assignment" x="168" y="272">flag[me] := 0</label></transition></template><template><name x="5" y="5">Hurry</name><location id="id4" x="312" y="208"></location><init ref="id4"/><transition><source ref="id4"/><target ref="id4"/><label kind="synchronisation" x="288" y="272">Go ?</label><nail x="344" y="264"/><nail x="264" y="264"/></transition></template><system>//Insert process assignments.
+M0 := MutexP ( 0, 1 );
+M1 := MutexP ( 1, 0 );
+H := Hurry ();
+//Edit system definition.
+system M0, M1, H;</system></nta>
