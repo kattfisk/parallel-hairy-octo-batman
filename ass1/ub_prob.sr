@@ -1,0 +1,46 @@
+resource UBprob()
+const m : int := 2	  #number of men
+const w : int := 2    #number of women	
+sem globals := 1
+var men_in_bathroom : int := 0
+var women_in_bathroom : int := 0
+
+process Man(i := 1 to m)
+  do true -> 
+		P(globals)
+		if(women_in_bathroom = 0) ->
+			++men_in_bathroom
+			V(globals)
+			# critical section, take a piss or w/e
+			write("Man in bathroom!")
+			nap(int(random(500, 1000)))
+			P(globals)
+			--men_in_bathroom
+			write("Man out bathroom!")
+		fi
+		V(globals)
+		# wait
+		nap(int(random(500, 1000)))
+  od
+end
+
+process Woman(j := 1 to w)
+   do true -> 
+		P(globals)
+		if(men_in_bathroom = 0) ->
+			++women_in_bathroom
+			V(globals)
+			# critical section, take a piss or w/e
+			write("Woman in bathroom!")
+			nap(int(random(500, 1000)))
+			P(globals)
+			--women_in_bathroom
+			write("Woman out bathroom!")
+		fi
+		V(globals)
+		# wait
+		nap(int(random(500, 1000)))
+  od
+end
+
+end UBprob
