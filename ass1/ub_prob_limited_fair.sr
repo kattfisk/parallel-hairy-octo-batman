@@ -1,0 +1,141 @@
+resource UBprob()
+
+const M : int := 4 # number of men
+const W : int := 4 # number of women	
+const LIMIT : int := 3 # max allowed in bathroom
+const MAN : int := 0
+const WOMAN : int := 1
+
+sem globals := 1
+sem men_wait := 0
+sem women_wait := 0
+
+var men_in_bathroom : int := 0
+var women_in_bathroom : int := 0
+var men_waiting : int := 0
+var women_waiting : int := 0
+# circular buffer used to log order of arrival
+var front : int := 1
+var rear : int := 1
+var buffer_length : int := M + W - 1
+var queue[buffer_length] : int
+
+procedure invariant()
+	if(not(men_in_bathroom = 0 or women_in_bathroom = 0)) ->
+		write("Safety fail! Both genders in bathroom!")
+	fi
+	if(men_in_bathroom + women_in_bathroom > LIMIT) ->
+		write("Safety fail! Too many ppl in bathroom!")
+	fi
+	if(men_waiting + women_waiting != 0 and men_in_bathroom + women_in_bathroom = 0) ->
+		write("Liveliness fail! Ppl waiting but no one in bathroom!")
+	fi
+end
+
+procedure let_in()
+
+#write("----- queue report from let_in -----")
+#writes("Men waiting: ");write(men_waiting)
+#writes("Women waiting: ");write(women_waiting)
+
+	if(men_waiting + women_waiting > 0) ->
+		# there are people waiting
+		if(queue[front] = MAN) ->
+			# next in line is a man
+			if(women_in_bathroom = 0 and men_in_bathroom < LIMIT) ->
+				# let him enter
+				++men_in_bathroom
+				V(men_wait)
+				# remove him from queue
+				--men_waiting
+				front := front mod buffer_length + 1
+			fi
+		[](queue[front] = WOMAN) ->
+			# next in line is a woman
+			if(men_in_bathroom = 0 and women_in_bathroom < LIMIT) ->
+				# let her enter
+				++women_in_bathroom
+				V(women_wait)
+				# remove her from queue
+				--women_waiting
+				front := front mod buffer_length + 1
+			fi
+		fi
+	fi
+end
+
+process man(i := 1 to M)
+	var gender : int := MAN
+	do true -> 
+		# try to enter
+		P(globals)
+		invariant()
+		if(men_waiting + women_waiting > 0 or women_in_bathroom > 0 or men_in_bathroom = LIMIT) ->
+			# wait your turn
+			queue[rear] := gender
+			rear := rear mod buffer_length + 1
+			++men_waiting
+			V(globals)
+			P(men_wait)
+		[] else ->
+			# enter directly
+			++men_in_bathroom
+			V(globals)
+		fi
+
+		# in bathroom/CS
+		#write("---  Man entered bathroom  ---")
+		#writes("Men in bathroom: ");write(men_in_bathroom)
+		#writes("Women in bathroom: ");write(women_in_bathroom)
+		nap(int(random(500, 2000))) # spend time inside
+
+		# exit
+		P(globals)
+		invariant()
+		--men_in_bathroom
+		let_in()
+		invariant()
+		V(globals)
+
+		nap(int(random(500, 2000))) # wait outside
+	od
+end
+
+process woman(i := 1 to W)
+	var gender : int := WOMAN
+	do true -> 
+		# try to enter
+		P(globals)
+		invariant()
+		if(men_waiting + women_waiting > 0 or men_in_bathroom > 0 or women_in_bathroom = LIMIT) ->
+			# wait your turn
+			queue[rear] := gender
+			rear := rear mod buffer_length + 1
+			++women_waiting
+			V(globals)
+			P(women_wait)
+		[] else ->
+			# enter directly
+			++women_in_bathroom
+			V(globals)
+		fi
+
+		# in bathroom/CS
+		#write("--- Woman entered bathroom ---")
+		#writes("Men in bathroom: ");write(men_in_bathroom)
+		#writes("Women in bathroom: ");write(women_in_bathroom)
+		nap(int(random(500, 2000))) # spend time inside
+
+		# exit
+		P(globals)
+		invariant()
+		--women_in_bathroom
+		let_in()
+		invariant()
+		V(globals)
+
+		nap(int(random(500, 2000))) # wait outside
+	od
+end
+
+end UBprob

@@ -1,0 +1,53 @@
+resource UB_problem
+	var num_men, num_women : int := 0
+	var delayed_men, delayed_women : int := 0
+	var limit := 4
+	sem mutex := 1
+	sem men := 0
+	sem women := 0
+	
+	process men(i := 1 to N)
+		do true 
+			P(mutex)
+			if (num_women > 0) 
+				++delayed_men
+				V(mutex)
+				P(men)
+			fi
+			# entering bathroom
+			++num_men
+			signal()
+	
+			# do some maning
+			nap(int(random(500, 1000)))
+	
+			# exiting bathroom
+			P(mutex)
+			++num_men
+			signal()
+			# do something else
+		od
+	end
+	
+	procedure signal()
+	# no fairness here, this is a race to the death :/
+		if (num_men = 0 and num_women = 0 and delayed_men > 0 and delayed_women > 0) ->
+			# bathroom is empty, alternate who goes first
+			if(women_first) ->
+				V(women)
+			else ->
+				V(men)
+		if (num_women = 0 and delayed_men > 0 and num_men < limit) ->
+			# let in a man
+			--delayed_men
+			V(men)
+		[] (num_men = 0 and delayed_women > 0 and num_women < limit) ->
+			# let in a woman
+			--delayed_women
+			V(women)
+		[] else
+			# release mutex
+			P(mutex)
+		fi
+	end
+end UB_problem
