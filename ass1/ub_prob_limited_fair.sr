@@ -38,27 +38,31 @@ procedure let_in()
 #writes("Men waiting: ");write(men_waiting)
 #writes("Women waiting: ");write(women_waiting)
 
+	# if there are people waiting
 	if(men_waiting + women_waiting > 0) ->
-		# there are people waiting
-		if(queue[front] = MAN) ->
-			# next in line is a man
-			if(women_in_bathroom = 0 and men_in_bathroom < LIMIT) ->
-				# let him enter
-				++men_in_bathroom
-				V(men_wait)
-				# remove him from queue
-				--men_waiting
-				front := front mod buffer_length + 1
+		if(queue[front] = MAN and women_in_bathroom = 0 and men_in_bathroom < LIMIT) ->
+			# let a man enter
+			++men_in_bathroom
+			V(men_wait)
+			# remove him from queue
+			--men_waiting
+			front := front mod buffer_length + 1
+			# if there's another man in line and there's more room
+			if(queue[front] = MAN and men_waiting > 0 and men_in_bathroom < LIMIT) ->
+				# let in more people
+				let_in()
 			fi
-		[](queue[front] = WOMAN) ->
-			# next in line is a woman
-			if(men_in_bathroom = 0 and women_in_bathroom < LIMIT) ->
-				# let her enter
-				++women_in_bathroom
-				V(women_wait)
-				# remove her from queue
-				--women_waiting
-				front := front mod buffer_length + 1
+		[](queue[front] = WOMAN and men_in_bathroom = 0 and women_in_bathroom < LIMIT) ->
+			# let a woman enter
+			++women_in_bathroom
+			V(women_wait)
+			# remove her from queue
+			--women_waiting
+			front := front mod buffer_length + 1
+			# if there's another woman in line and there's more room
+			if(queue[front] = WOMAN and women_waiting > 0 and women_in_bathroom < LIMIT) ->
+				# let in more people
+				let_in()
 			fi
 		fi
 	fi
