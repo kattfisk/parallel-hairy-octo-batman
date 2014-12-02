@@ -2,7 +2,7 @@ resource UBprob()
 
 const M : int := 4 # number of men
 const W : int := 4 # number of women	
-const LIMIT : int := 3 # max allowed in bathroom
+const LIMIT : int := 4 # max allowed in bathroom
 const MAN : int := 0
 const WOMAN : int := 1
 
