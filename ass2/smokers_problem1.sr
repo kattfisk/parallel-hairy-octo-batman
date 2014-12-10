@@ -1,0 +1,86 @@
+resource SmokersProb()
+const SMOKERS : int := 3 # number of smokers 
+
+op agent_chan(int)
+op smoker_chan[SMOKERS](int)
+
+
+process Agent
+#	var tobacco : int   #amount of tobacco on table
+#	var paper : int     #amount of paper on table	
+#	var matches : int   #amount of matches on table 	
+
+	var items_on_table[3] : int # used for putting things on table
+	write("Started Agent-process...")
+	items_on_table[1] := 0
+	items_on_table[2] := 0
+	items_on_table[3] := 0
+
+
+	do true -> 
+		# randomly select two items
+		var first_item := int(random(1,4))
+		items_on_table[first_item]++
+    	write("Putting item ", first_item," on the table.") 
+		var second_item := int(random(1,4))
+		do items_on_table[second_item] != 0 ->
+			second_item := int(random(1,4))
+		od
+		++items_on_table[second_item]
+    	write("Putting item ", second_item," on the table.") 
+		# tell smokers what items are available
+		fa i := 1 to SMOKERS ->
+			fa j := 1 to 3 ->
+				if items_on_table[j] != 0 ->
+					send smoker_chan[i](j)
+				fi
+			af
+		af	
+	
+		# wait until the contents are picked up 
+		do items_on_table[1] + items_on_table[2] + items_on_table[3] > 0 ->
+			var mess : int
+			receive agent_chan(mess)
+			--items_on_table[mess]
+		od
+	od
+end
+
+process Smoker(i := 1 to SMOKERS)
+	write("Starting Smoker-process nr.",i)
+	var my_item : int := i
+	var item_need : int
+	do true -> 
+		item_need := 2
+		# wait until the items you need are on the table
+		var mess : int
+		receive smoker_chan[i](mess)
+		if mess != my_item ->
+			--item_need
+		fi
+		receive smoker_chan[i](mess)
+		if mess != my_item ->
+			--item_need
+		fi
+		# pick up the items
+		if item_need = 0 ->
+			write("IMA PICKUO SHIT YO ",my_item)
+			if my_item = 1 ->
+				send agent_chan(2)
+				send agent_chan(3)
+			[] my_item = 2 ->
+				send agent_chan(1)
+				send agent_chan(3)
+			[] my_item = 3 ->
+				send agent_chan(1)
+				send agent_chan(2)
+			fi
+		fi
+
+		# smoke
+		write("Smoker nr.",i," started smoking.")
+		nap(int(random(1000, 2000)))
+	od
+end
+
+end SmokersProb
