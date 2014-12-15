@@ -2,20 +2,19 @@ resource SmokersProb()
 const SMOKERS : int := 3 # number of smokers 
 
 op agent_chan(int)
-op smoker_chan[SMOKERS](int)
-
+op smoker_chan[SMOKERS](int; int; int)
 
 process Agent
+# TODO: must we have these?
 #	var tobacco : int   #amount of tobacco on table
 #	var paper : int     #amount of paper on table	
 #	var matches : int   #amount of matches on table 	
 
-	var items_on_table[3] : int # used for putting things on table
+	var items_on_table[3] : int
 	write("Started Agent-process...")
-	items_on_table[1] := 0
-	items_on_table[2] := 0
-	items_on_table[3] := 0
-
+	items_on_table[1] := 0 # tobacco
+	items_on_table[2] := 0 # paper
+	items_on_table[3] := 0 # matches
 
 	do true -> 
 		# randomly select two items
@@ -30,11 +29,7 @@ process Agent
     	write("Putting item ", second_item," on the table.") 
 		# tell smokers what items are available
 		fa i := 1 to SMOKERS ->
-			fa j := 1 to 3 ->
-				if items_on_table[j] != 0 ->
-					send smoker_chan[i](j)
-				fi
-			af
+			send smoker_chan[i](items_on_table[1], items_on_table[2], items_on_table[3])
 		af	
 	
 		# wait until the contents are picked up 
@@ -49,22 +44,14 @@ end
 process Smoker(i := 1 to SMOKERS)
 	write("Starting Smoker-process nr.",i)
 	var my_item : int := i
-	var item_need : int
 	do true -> 
-		item_need := 2
 		# wait until the items you need are on the table
-		var mess : int
-		receive smoker_chan[i](mess)
-		if mess != my_item ->
-			--item_need
-		fi
-		receive smoker_chan[i](mess)
-		if mess != my_item ->
-			--item_need
-		fi
-		# pick up the items
-		if item_need = 0 ->
+		var mess[3] : int
+		receive smoker_chan[i](mess[1], mess[2], mess[3])
+		# check the things we need are available
+		if mess[1] + 2*mess[2] + 3*mess[3] + my_item = 6 ->
 			write("IMA PICKUO SHIT YO ",my_item)
+			# pick up items
 			if my_item = 1 ->
 				send agent_chan(2)
 				send agent_chan(3)
@@ -75,11 +62,10 @@ process Smoker(i := 1 to SMOKERS)
 				send agent_chan(1)
 				send agent_chan(2)
 			fi
-		fi
-
 		# smoke
 		write("Smoker nr.",i," started smoking.")
 		nap(int(random(1000, 2000)))
+		fi
 	od
 end
 
