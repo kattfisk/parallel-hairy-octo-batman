@@ -1,0 +1,31 @@
+--- assignment1_a4.pdf ---
+Added page numbers to footer.
+
+1
+Described problems.
+
+2
+Added global invariants.
+
+4.2
+Changed to new queries.
+Described the purpose of the queries.
+Added info about how fairness and liveness was tested.
+
+5
+Slightly improved last paragraph.
+
+--- assignment1_a4_1.q ---
+Removed unused queries.
+Broke up queries.
+Added lame eventual entry check.
+
+--- assignment1_a4_2.q ---
+Removed unused queries.
+Broke up queries.
+Added lame eventual entry check.
+
+--- assignment1_a4_3.sr ---
+Added random nap after creation to give more random initial distribution of processes. (Men used to always enter first as they were spawned before women.)
+Now prints process id and queueing processes for better testing of fairness and liveness.
+Manually tested fairness and liveness.
