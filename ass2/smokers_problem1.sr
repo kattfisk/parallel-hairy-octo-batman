@@ -5,11 +5,6 @@ op agent_chan(int)
 op smoker_chan[SMOKERS](int; int; int)
 
 process Agent
-# TODO: must we have these?
-#	var tobacco : int   #amount of tobacco on table
-#	var paper : int     #amount of paper on table	
-#	var matches : int   #amount of matches on table 	
-
 	var items_on_table[3] : int
 	write("Started Agent-process...")
 	items_on_table[1] := 0 # tobacco
