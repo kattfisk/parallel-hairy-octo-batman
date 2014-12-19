@@ -1,3 +1,3 @@
-# 0 /home/StudentHome/2013/a13adana/Documents/parallella_processer_da312g/ass2/smokers_problem2.sr 1+
+# 0 /home/StudentHome/2013/b13alemi/GitHub/parallel-hairy-octo-batman/ass2/smokers_problem1.sr 1+
 
 resource SmokersProb ( ) ; end ;

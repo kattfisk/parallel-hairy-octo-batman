@@ -3,51 +3,59 @@
 const int SMOKERS = 3;	//Number of smokers
 
 const int n = 4; 	//number of processes, used here to determine the minmum length of a message buffer (hence, minimizing state space)
-const int m = 1;	//Replace 1 with the number of channels
-const int arg = 1;	//Replaxe 1 with the maximum number of arguments you send on any channel
+const int m = 4;	//Replace 1 with the number of channels
+const int arg = 3;	//Replaxe 1 with the maximum number of arguments you send on any channel
 
 int msg[arg];		//Emulating the message sent on channel
 
 int[0,SMOKERS] ID;	//Global variable used to communicate process id to semaphore
 
-
 urgent chan send[m];
 urgent chan receive[m];
 urgent chan Go;
 
-const int TOBACCO 	= 0;
-const int PAPER 	= 1;
-const int MATCHES 	= 2;</declaration><template><name x="5" y="5">Agent</name><parameter>const int id</parameter><declaration>
+const int TOBACCO 	= 1;
+const int PAPER 	= 2;
+const int MATCHES 	= 3;</declaration><template><name x="5" y="5">Agent</name><parameter>const int id</parameter><declaration>
 
-int tobacco = 0; 	//Amount of tobacco on the table
-int paper = 0; 		//Amount of paper on the table
-int matches = 0; 	//Amount of matches on the table
-int myInMsg[arg];
-int myOutMsg[arg];</declaration><location id="id0" x="-56" y="376"></location><location id="id1" x="360" y="376"><name x="384" y="360">ItemsPlaced</name></location><location id="id2" x="360" y="104"><name x="376" y="88">PlaceItems</name></location><location id="id3" x="-56" y="104"><name x="-112" y="96">Initial</name></location><init ref="id3"/><transition><source ref="id0"/><target ref="id3"/></transition><transition><source ref="id2"/><target ref="id1"/><label kind="assignment" x="300" y="240">++tobacco
-++matches</label></transition><transition><source ref="id1"/><target ref="id0"/></transition><transition><source ref="id3"/><target ref="id2"/></transition></template><template><name x="5" y="5">Smoker</name><parameter>const int id</parameter><declaration>
+int tobacco 	= 0; 	//Amount of tobacco on the table
+int paper 	= 0; 	//Amount of paper on the table
+int matches 	= 0; 	//Amount of matches on the table
 int myInMsg[arg];
 int myOutMsg[arg];
 
-int my_item;		//Held item ID
-int[0,3] mess;		//Recieved messages</declaration><location id="id4" x="736" y="592"></location><location id="id5" x="1168" y="352"></location><location id="id6" x="800" y="352"></location><location id="id7" x="352" y="352"><name x="342" y="322">Recieve</name></location><location id="id8" x="112" y="352"><name x="102" y="322">Start</name></location><location id="id9" x="104" y="176"><name x="96" y="192">PickingUpShitYo</name></location><location id="id10" x="104" y="40"><name x="94" y="10">Smoking</name></location><location id="id11" x="352" y="40"><name x="320" y="8">NeedSmoke</name></location><location id="id12" x="352" y="176"><name x="328" y="192">ItemsThere</name></location><init ref="id8"/><transition><source ref="id4"/><target ref="id7"/><nail x="320" y="400"/></transition><transition><source ref="id5"/><target ref="id4"/></transition><transition><source ref="id6"/><target ref="id7"/><nail x="800" y="400"/><nail x="616" y="400"/><nail x="352" y="392"/></transition><transition><source ref="id7"/><target ref="id6"/><label kind="assignment" x="424" y="360">(mess[0] = 0) &amp;&amp; (mess[1] = 0) &amp;&amp; (mess[2] = 0)</label><nail x="416" y="352"/></transition><transition><source ref="id6"/><target ref="id5"/><label kind="assignment" x="832" y="352">mess[1] + 2*mess[2] + 3*mess[3] + my_item = 6</label></transition><transition><source ref="id8"/><target ref="id7"/><label kind="assignment" x="184" y="360">my_item = id</label></transition><transition><source ref="id9"/><target ref="id10"/></transition><transition><source ref="id12"/><target ref="id9"/></transition><transition><source ref="id10"/><target ref="id11"/></transition><transition><source ref="id11"/><target ref="id12"/></transition></template><template><name x="5" y="5">Hurry</name><location id="id13" x="312" y="208"></location><init ref="id13"/><transition><source ref="id13"/><target ref="id13"/><label kind="synchronisation" x="376" y="200">Go!</label><nail x="368" y="184"/><nail x="368" y="240"/></transition></template><template><name x="5" y="5">Channel</name><parameter>const int ChId</parameter><declaration>
+int items_on_table[arg];	// ID's of items on the table, four slots to "emulate" SRs one indexed arrays
+int first_item 	= 0;	// First tabled item
+int second_item = 0;	// Second tabled item
+//int mess;		// Message inbox
+</declaration><location id="id0" x="264" y="-104"></location><location id="id1" x="264" y="-208"></location><location id="id2" x="584" y="-272"></location><location id="id3" x="136" y="-272"><name x="160" y="-296">Await_clear</name></location><location id="id4" x="552" y="-272"></location><location id="id5" x="584" y="-376"></location><location id="id6" x="768" y="-272"></location><location id="id7" x="792" y="-24"></location><location id="id8" x="768" y="104"></location><location id="id9" x="560" y="104"></location><location id="id10" x="208" y="104"></location><location id="id11" x="-8" y="104"><name x="-64" y="96">Initial</name></location><init ref="id11"/><transition><source ref="id3"/><target ref="id11"/><label kind="guard" x="-160" y="-72">items_on_table[0] +
+items_on_table[1] +
+items_on_table[2] == 0</label><label kind="synchronisation" x="-160" y="-24">Go?</label><nail x="0" y="-104"/></transition><transition><source ref="id3"/><target ref="id0"/><label kind="guard" x="96" y="-168">items_on_table[0] +
+items_on_table[1] +
+items_on_table[2] &gt; 0</label><label kind="synchronisation" x="64" y="-136">Go?</label><nail x="136" y="-248"/><nail x="32" y="-104"/></transition><transition><source ref="id1"/><target ref="id3"/><label kind="synchronisation" x="168" y="-232">Go?</label><label kind="assignment" x="160" y="-264">--items_on_table[myInMsg[0]]</label><nail x="264" y="-224"/><nail x="264" y="-240"/><nail x="144" y="-240"/></transition><transition><source ref="id0"/><target ref="id1"/><label kind="synchronisation" x="280" y="-160">receive[3]?</label><label kind="assignment" x="280" y="-176">myInMsg = msg</label></transition><transition><source ref="id6"/><target ref="id2"/><label kind="synchronisation" x="640" y="-248">Go?</label><label kind="assignment" x="640" y="-264">msg = myOutMsg</label></transition><transition><source ref="id4"/><target ref="id3"/><label kind="synchronisation" x="424" y="-296">send[2]!</label></transition><transition><source ref="id5"/><target ref="id4"/><label kind="synchronisation" x="512" y="-336">send[1]!</label></transition><transition><source ref="id2"/><target ref="id5"/><label kind="synchronisation" x="592" y="-336">send[0]!</label></transition><transition><source ref="id7"/><target ref="id6"/><label kind="synchronisation" x="592" y="-144">Go?</label><label kind="assignment" x="592" y="-160">myOutMsg = items_on_table</label></transition><transition><source ref="id8"/><target ref="id9"/><label kind="guard" x="872" y="80">first_item == second_item</label><label kind="synchronisation" x="872" y="104">Go?</label><nail x="784" y="80"/><nail x="864" y="80"/><nail x="864" y="96"/><nail x="792" y="96"/><nail x="776" y="128"/><nail x="744" y="168"/><nail x="688" y="184"/><nail x="632" y="184"/><nail x="568" y="168"/><nail x="552" y="120"/></transition><transition><source ref="id8"/><target ref="id7"/><label kind="guard" x="800" y="8">first_item != second_item</label><label kind="synchronisation" x="800" y="41">Go?</label><label kind="assignment" x="800" y="25">items_on_table[second_item]++</label></transition><transition><source ref="id9"/><target ref="id8"/><label kind="synchronisation" x="704" y="136">Go?</label><label kind="assignment" x="592" y="136">second_item = 0</label><nail x="584" y="160"/><nail x="664" y="176"/><nail x="736" y="152"/></transition><transition><source ref="id9"/><target ref="id8"/><label kind="synchronisation" x="704" y="8">Go?</label><label kind="assignment" x="592" y="8">second_item = 1</label><nail x="584" y="48"/><nail x="664" y="32"/><nail x="736" y="48"/></transition><transition><source ref="id9"/><target ref="id8"/><label kind="synchronisation" x="704" y="80">Go?</label><label kind="assignment" x="592" y="80">second_item = 2</label></transition><transition><source ref="id10"/><target ref="id9"/><label kind="synchronisation" x="464" y="112">Go?</label><label kind="assignment" x="280" y="112">items_on_table[first_item]++</label></transition><transition><source ref="id11"/><target ref="id10"/><label kind="synchronisation" x="128" y="136">Go?</label><label kind="assignment" x="40" y="136">first_item = 0</label><nail x="32" y="160"/><nail x="104" y="176"/><nail x="176" y="160"/></transition><transition><source ref="id11"/><target ref="id10"/><label kind="synchronisation" x="128" y="80">Go?</label><label kind="assignment" x="40" y="80">first_item = 2</label></transition><transition><source ref="id11"/><target ref="id10"/><label kind="synchronisation" x="128" y="0">Go?</label><label kind="assignment" x="40" y="0">first_item = 1</label><nail x="32" y="40"/><nail x="104" y="24"/><nail x="176" y="40"/></transition></template><template><name x="5" y="5">Smoker</name><parameter>const int id</parameter><declaration>
+int myInMsg[arg];
+int myOutMsg[arg];
+
+int my_item = 0;	//Held item ID
+int mess[arg];		//Recieved messages</declaration><location id="id12" x="1528" y="352"><name x="1544" y="320">Smoking</name></location><location id="id13" x="1392" y="352"></location><location id="id14" x="1392" y="448"></location><location id="id15" x="1392" y="256"></location><location id="id16" x="1248" y="352"><name x="1168" y="320">Picking_up</name></location><location id="id17" x="728" y="352"><name x="640" y="320">Check_items</name><label kind="comments">Check items</label></location><location id="id18" x="288" y="352"><name x="192" y="320">Need_smoke</name></location><location id="id19" x="56" y="352"><name x="8" y="320">Initial</name></location><init ref="id19"/><transition><source ref="id18"/><target ref="id17"/><label kind="synchronisation" x="472" y="384">receive[id]?</label><label kind="assignment" x="472" y="360">myInMsg = msg</label></transition><transition><source ref="id12"/><target ref="id18"/><label kind="synchronisation" x="1056" y="504">Go?</label><nail x="1632" y="352"/><nail x="1632" y="528"/><nail x="288" y="528"/></transition><transition><source ref="id14"/><target ref="id12"/><label kind="synchronisation" x="1432" y="416">send[2]!</label><nail x="1528" y="448"/></transition><transition><source ref="id15"/><target ref="id12"/><label kind="synchronisation" x="1432" y="224">send[3]!</label><nail x="1528" y="256"/></transition><transition><source ref="id13"/><target ref="id12"/><label kind="synchronisation" x="1432" y="320">send[3]!</label></transition><transition><source ref="id16"/><target ref="id13"/><label kind="guard" x="1280" y="305">my_item == 1</label><label kind="synchronisation" x="1280" y="320">send[1]!</label></transition><transition><source ref="id16"/><target ref="id14"/><label kind="guard" x="1280" y="401">my_item == 2</label><label kind="synchronisation" x="1280" y="416">send[1]!</label><nail x="1248" y="448"/></transition><transition><source ref="id16"/><target ref="id15"/><label kind="guard" x="1280" y="209">my_item == 0</label><label kind="synchronisation" x="1280" y="224">send[2]!</label><nail x="1248" y="256"/></transition><transition><source ref="id17"/><target ref="id18"/><label kind="guard" x="328" y="232">(myInMsg[0] + 2*myInMsg[1] + 3*myInMsg[2] + my_item) != 6</label><label kind="synchronisation" x="328" y="256">Go!</label><nail x="728" y="280"/><nail x="288" y="280"/></transition><transition><source ref="id17"/><target ref="id16"/><label kind="guard" x="784" y="360">(myInMsg[0] + 2*myInMsg[1] + 3*myInMsg[2] + my_item) == 6</label><label kind="synchronisation" x="784" y="384">Go?</label></transition><transition><source ref="id19"/><target ref="id18"/><label kind="synchronisation" x="120" y="384">Go?</label><label kind="assignment" x="120" y="360">my_item = id</label></transition></template><template><name x="5" y="5">Hurry</name><location id="id20" x="312" y="208"></location><init ref="id20"/><transition><source ref="id20"/><target ref="id20"/><label kind="synchronisation" x="376" y="200">Go!</label><nail x="368" y="184"/><nail x="368" y="240"/></transition></template><template><name x="5" y="5">Channel</name><parameter>const int ChId</parameter><declaration>
 
 int buff[n][arg];
 int count = 0;
-int tmp = 0;</declaration><location id="id14" x="472" y="192"><committed/></location><location id="id15" x="360" y="256"><committed/></location><location id="id16" x="256" y="184"></location><init ref="id16"/><transition><source ref="id15"/><target ref="id16"/><label kind="guard" x="272" y="200">tmp==count</label><label kind="assignment" x="272" y="216">tmp=0</label></transition><transition><source ref="id14"/><target ref="id15"/><label kind="assignment" x="392" y="120">buff[tmp] = buff[tmp+1],
-tmp++</label><nail x="360" y="192"/></transition><transition><source ref="id15"/><target ref="id14"/><label kind="guard" x="400" y="232">tmp&lt;count</label><nail x="472" y="256"/></transition><transition><source ref="id16"/><target ref="id16"/><label kind="synchronisation" x="208" y="56">send[ChId]?</label><label kind="assignment" x="208" y="72">buff[count] = msg,
-count++</label><nail x="216" y="112"/><nail x="296" y="112"/></transition><transition><source ref="id16"/><target ref="id15"/><label kind="guard" x="216" y="256">count&gt;0</label><label kind="synchronisation" x="216" y="272">receive[ChId]!</label><label kind="assignment" x="216" y="288">msg = buff[0],
+int tmp = 0;</declaration><location id="id21" x="472" y="192"><committed/></location><location id="id22" x="360" y="256"><committed/></location><location id="id23" x="256" y="184"></location><init ref="id23"/><transition><source ref="id22"/><target ref="id23"/><label kind="guard" x="272" y="200">tmp==count</label><label kind="assignment" x="272" y="216">tmp=0</label></transition><transition><source ref="id21"/><target ref="id22"/><label kind="assignment" x="392" y="120">buff[tmp] = buff[tmp+1],
+tmp++</label><nail x="360" y="192"/></transition><transition><source ref="id22"/><target ref="id21"/><label kind="guard" x="400" y="232">tmp&lt;count</label><nail x="472" y="256"/></transition><transition><source ref="id23"/><target ref="id23"/><label kind="synchronisation" x="208" y="56">send[ChId]?</label><label kind="assignment" x="208" y="72">buff[count] = msg,
+count++</label><nail x="216" y="112"/><nail x="296" y="112"/></transition><transition><source ref="id23"/><target ref="id22"/><label kind="guard" x="216" y="256">count&gt;0</label><label kind="synchronisation" x="216" y="272">receive[ChId]!</label><label kind="assignment" x="216" y="288">msg = buff[0],
 count--</label><nail x="256" y="256"/><nail x="296" y="256"/></transition></template><system>//Insert process assignments to get more instances of a template.
-A = Agent ( 0 );
+S0 = Smoker ( 0 );
 S1 = Smoker ( 1 );			
 S2 = Smoker ( 2 );			
-S3 = Smoker ( 3 );			
-H = Hurry( );
+A  = Agent  ( 3 );			
+H  = Hurry( );
 
-smoker_chan[0] = Channel( 0 ); 	// Smoker channel
-smoker_chan[1] = Channel( 1 ); 	// Smoker channel
-smoker_chan[2] = Channel( 2 ); 	// Smoker channel
-agent_chan[3]  = Channel( 3 );	// Agent channel
+Ch0 = Channel( 0 ); 	// Smoker channel
+Ch1 = Channel( 1 ); 	// Smoker channel
+Ch2 = Channel( 2 ); 	// Smoker channel
+Ch3 = Channel( 3 );	// Agent channel
 
 //System definition.
-system A,S1,S2,S3,Ch0,H; 			//Add the template instances you want to include in simulation
+system A,S0,S1,S2,H,Ch0,Ch1,Ch2,Ch3; 			//Add the template instances you want to include in simulation
 </system></nta>

@@ -21,10 +21,8 @@ process Agent
 		var first_item := int(random(1,4))
 		items_on_table[first_item]++
     	write("Putting item ", first_item," on the table.") 
-		var second_item := int(random(1,4))
-		do items_on_table[second_item] != 0 ->
-			second_item := int(random(1,4))
-		od
+		var second_item := ((first_item + int(random(0,2))) mod 3) + 1
+		write("Second itam es: ", second_item)
 		++items_on_table[second_item]
     	write("Putting item ", second_item," on the table.") 
 		# tell smokers what items are available
@@ -44,9 +42,9 @@ end
 process Smoker(i := 1 to SMOKERS)
 	write("Starting Smoker-process nr.",i)
 	var my_item : int := i
+	var mess[3] : int
 	do true -> 
 		# wait until the items you need are on the table
-		var mess[3] : int
 		receive smoker_chan[i](mess[1], mess[2], mess[3])
 		# check the things we need are available
 		if mess[1] + 2*mess[2] + 3*mess[3] + my_item = 6 ->
