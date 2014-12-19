@@ -3,19 +3,19 @@
 /*
 The agent will eventually continue to the critical section
 */
-A.Initial --> A.ItemsPlaced
+E<> A.Items_tabled
 
 /*
-The amount of tobacco on the table is 0 or 1 guaranteeing that access to the critical section is done in correct order. 
+The amount of an item on the table is 0 or 1 guaranteeing that access to the critical section is done in correct order. LOOPS FOREVER :( WE DON'T KNOW WHY
 */
-A[] A.tobacco == 0 || A.tobacco==1
+A[] A.items_on_table[1] == 0 || A.items_on_table[1] == 1
 
 /*
 This is a check for mutual exclusion between the agent and a smoker.
 */
-E<> A.PlaceItems && S1.PickingUp
+E<> A.Await_clear && S0.Picking_up
 
 /*
-Not deadlock should be a global invariant.
+Not deadlock should be a global invariant. FAILS :( WE DON'T KNOW WHY
 */
-A[] ! deadlock
+A[] !deadlock
