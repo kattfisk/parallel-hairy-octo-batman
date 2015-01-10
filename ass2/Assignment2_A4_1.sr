@@ -1,65 +1,59 @@
-resource SmokersProb()
-const SMOKERS : int := 3 # number of smokers 
-
-op agent_chan(int)
-op smoker_chan[SMOKERS](int; int; int)
-
-process Agent
-	var items_on_table[3] : int
-	write("Started Agent-process...")
-	items_on_table[1] := 0 # tobacco
-	items_on_table[2] := 0 # paper
-	items_on_table[3] := 0 # matches
-
-	do true -> 
-		# randomly select two items
-		var first_item := int(random(1,4))
-		items_on_table[first_item]++
-    	write("Putting item ", first_item," on the table.") 
-		var second_item := ((first_item + int(random(0,2))) mod 3) + 1
-		write("Second itam es: ", second_item)
-		++items_on_table[second_item]
-    	write("Putting item ", second_item," on the table.") 
-		# tell smokers what items are available
-		fa i := 1 to SMOKERS ->
-			send smoker_chan[i](items_on_table[1], items_on_table[2], items_on_table[3])
-		af	
+resource SmokersProblem()
 	
-		# wait until the contents are picked up 
-		do items_on_table[1] + items_on_table[2] + items_on_table[3] > 0 ->
-			var mess : int
-			receive agent_chan(mess)
-			--items_on_table[mess]
+	const SMOKERS : int := 3			# Number of smokers
+	
+	const TOBACCO : int := 1
+	const PAPER   : int := 2
+	const MATCHES : int := 3
+
+	op request_channel()					# Smokers request items
+	op broadcast_channel[3]()			# One channel per smoker type
+	
+	process Agent
+		var items_on_table[3] : int
+		
+		write("Started Agent")
+		
+		do true ->	
+			# Clear table
+			items_on_table[TOBACCO] := 0
+			items_on_table[PAPER]   := 0
+			items_on_table[MATCHES] := 0
+			
+			# Randomly select two items
+			var first_item := int(random(1,4))
+			++items_on_table[first_item]
+			write("Put item ", first_item," on table.") 
+			var second_item := ((first_item + int(random(0,2))) mod 3) + 1
+			++items_on_table[second_item]
+			write("Put item ", second_item," on table.") 
+			
+			# Calculate the smoker type that is to pick up items
+			var smoker_type := PAPER + TOBACCO + MATCHES
+			smoker_type -:= items_on_table[PAPER] * PAPER
+			smoker_type -:= items_on_table[TOBACCO] * TOBACCO
+			smoker_type -:= items_on_table[MATCHES] * MATCHES
+			
+			# Inform relevant smokers of the available items
+			send broadcast_channel[smoker_type]()
+			
+			# Receive item request from smoker
+			receive request_channel()
 		od
-	od
-end
+		
+	end
+	
+	process Smoker(i := 1 to SMOKERS)
+		write("Started Smoker ",i)
+		do true ->
+			# Wait for message that the needed components are available
+			receive broadcast_channel[i]()
+			# Pick up items
+			send request_channel()
+			# Smoke
+			write("Smoker ",i," started smoking.")
+			nap(int(random(1000, 2000)))
+		od
+	end
 
-process Smoker(i := 1 to SMOKERS)
-	write("Starting Smoker-process nr.",i)
-	var my_item : int := i
-	var mess[3] : int
-	do true -> 
-		# wait until the items you need are on the table
-		receive smoker_chan[i](mess[1], mess[2], mess[3])
-		# check the things we need are available
-		if mess[1] + 2*mess[2] + 3*mess[3] + my_item = 6 ->
-			write("IMA PICKUO SHIT YO ",my_item)
-			# pick up items
-			if my_item = 1 ->
-				send agent_chan(2)
-				send agent_chan(3)
-			[] my_item = 2 ->
-				send agent_chan(1)
-				send agent_chan(3)
-			[] my_item = 3 ->
-				send agent_chan(1)
-				send agent_chan(2)
-			fi
-		# smoke
-		write("Smoker nr.",i," started smoking.")
-		nap(int(random(1000, 2000)))
-		fi
-	od
-end
-
-end SmokersProb
+end SmokersProblem

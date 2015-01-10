@@ -2,69 +2,59 @@ resource SmokersProb()
 const SMOKERS : int := 6 # number of smokers
 
 const TOBACCO : int := 1
-const PAPER : int := 2
+const PAPER : int   := 2
 const MATCHES : int := 3
 
-# one request channel for each type
-op agent_request[3](int)
+# One request channel for each type
+op request_channel(int; int)
 
-# one reply channel for each smoker
-op smoker_reply[SMOKERS]()
+# One reply channel for each smoker
+op reply_channel[SMOKERS]()
 
-process Agent
-	write("Starting Agent...")
-	var items_on_table[3] : int
-	var smoker_type : int
-	var smoker_id : int
-	var first_item : int := 1
-	var second_item : int
-	
-	do true -> 
-		# clear table
-		items_on_table[TOBACCO] := 0
-		items_on_table[PAPER] := 0
-		items_on_table[MATCHES] := 0
+	process Agent
+		write("Started Agent")
+		var items_on_table[3] : int
+		
+		do true -> 
+			# Clear table
+			items_on_table[TOBACCO] := 0
+			items_on_table[PAPER]   := 0
+			items_on_table[MATCHES] := 0
 
-		# put items on table 
-		# this variable will alternate between 1, 2 and 3
-		first_item := (first_item % 3) + 1
-    	write("Putting item ", first_item," on the table.") 
-		++items_on_table[first_item]
-		# next item
-		second_item := (first_item % 3) + 1
-    	write("Putting item ", second_item," on the table.")
-		++items_on_table[second_item]
+			# Wait for requests
+			var smoker_id : int
+			var smoker_type : int
+			receive request_channel(smoker_type, smoker_id)
 
-		# calculate the smoker type that is to pick up items
-		smoker_type := PAPER + TOBACCO + MATCHES
-		smoker_type -:= items_on_table[TOBACCO] * TOBACCO
-		smoker_type -:= items_on_table[PAPER] * PAPER
-		smoker_type -:= items_on_table[MATCHES] * MATCHES
-
-		# pick the first request in line from a smoker of correct type
-		# if there are no request queued then wait for one
-		receive agent_request[smoker_type](smoker_id)
-
-		# send reply telling smoker to smoke
-		send smoker_reply[smoker_id]()
-		write("Gave stuff to ", smoker_id)
-	od
-end
-
-process Smoker(i := 1 to SMOKERS)
-	write("Starting Smoker ",i)
-	var my_item : int := ((i-1) % 3) + 1
-	do true -> 
-		# request ingredients from agent
-		send agent_request[my_item](i)
-
-		# wait for reply from agent
-		receive smoker_reply[i]()
+			# Put needed items on table
+			var first_item : int := (smoker_type % 3) + 1
+			write("Put item ", first_item, " on table.")
+			items_on_table[first_item] := 1
+			var second_item : int := (first_item % 3) + 1
+			write("Put item ", second_item, " on table.")
+			items_on_table[second_item] := 1
 			
-		# smoke for a while
-		write("Smoker ",i," started smoking.")
-		nap(int(random(1000, 3000)))
-	od
-end
+			# Send reply to smoker
+			write("Giving items to ", smoker_id)
+			send reply_channel[smoker_id]()
+		od
+	end
 
+	process Smoker(i := 1 to SMOKERS)
+		write("Starting Smoker ",i)
+		var my_item : int := ((i - 1) % 3) + 1
+		do true -> 
+			# request ingredients from agent
+			write(i, " requesting items")
+			send request_channel(my_item, i)
+
+			# wait for reply from agent
+			receive reply_channel[i]()
+				
+			# smoke for a while
+			write("Smoker ",i," started smoking.")
+			nap(int(random(1000, 3000)))
+		od
+	end
+	
 end SmokersProb

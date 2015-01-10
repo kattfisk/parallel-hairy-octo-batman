@@ -1,90 +1,60 @@
 resource SmokersProb()
-const SMOKERS : int := 6 # number of smokers 
+const SMOKERS : int := 6 # number of smokers
 
-# smoker_id, pack_ver
-op agent_chan(int; int)
-op smoker_reply[SMOKERS](int)
-# tobacco, paper, matches, pack_ver
-op smoker_chan[SMOKERS](int; int; int; int)
+const TOBACCO : int := 1
+const PAPER : int := 2
+const MATCHES : int := 3
 
-process Agent
-	var items_on_table[3] : int
-	
-	# Determins the current package version
-	var cpack_ver : int
-	
-	items_on_table[1] := 0 # tobacco
-	items_on_table[2] := 0 # paper
-	items_on_table[3] := 0 # matches
-	cpack_ver := 0
-	
-	# Must await until 
-	# nap(100*SMOKERS)
-	write("Starting Agent...")
-	do true -> 
-		# randomly select two items
-		var first_item := int(random(1,4))
-		items_on_table[first_item]++
-    	write("Putting item ", first_item," on the table.") 
-		var second_item := int(random(1,4))
-		do items_on_table[second_item] != 0 ->
-			second_item := int(random(1,4))
-		od
-		++items_on_table[second_item]
-    	write("Putting item ", second_item," on the table.")
+# One request channel for each type
+op request_channel(int; int)
+
+# One reply channel for each smoker
+op reply_channel[SMOKERS]()
+
+	process Agent
+		write("Started Agent")
+		var items_on_table[3] : int
 		
-		# tell smokers what items are available
-		fa i := 1 to SMOKERS ->
-			send smoker_chan[i](items_on_table[1], items_on_table[2], items_on_table[3], cpack_ver)
-		af	
+		do true -> 
+			# Clear table
+			items_on_table[TOBACCO] := 0
+			items_on_table[PAPER]   := 0
+			items_on_table[MATCHES] := 0
 
-		# wait until the contents are picked up 
-		do items_on_table[1] + items_on_table[2] + items_on_table[3] > 0 ->
-			var id : int
-			var pver : int
-			receive agent_chan(id, pver)
+			# Wait for requests
+			var smoker_id : int
+			var smoker_type : int
+			receive request_channel(smoker_type, smoker_id)
+
+			# Put needed items on table
+			var first_item : int := (smoker_type % 3) + 1
+			write("Put item ", first_item, " on table.")
+			items_on_table[first_item] := 1
+			var second_item : int := (first_item % 3) + 1
+			write("Put item ", second_item, " on table.")
+			items_on_table[second_item] := 1
 			
-			if pver = cpack_ver ->
-				write("Gave stuff to ", id)
-				send smoker_reply[id](1)
-				++cpack_ver
-				
-				items_on_table[1] := 0
-				items_on_table[2] := 0
-				items_on_table[3] := 0
-			[] else ->
-				write("Dis n00b tried to get stuff but sucked ", id)
-				send smoker_reply[id](0)
-			fi
+			# Send reply to smoker
+			write("Giving items to ", smoker_id)
+			send reply_channel[smoker_id]()
 		od
-	od
-end
+	end
 
-process Smoker(i := 1 to SMOKERS)
-	write("Starting Smoker-process nr.",i)
-	var my_item : int := ((i-1) % 3) + 1
-	do true -> 
-		# wait until the items you need are on the table
-		var pver : int
-		var mess[3] : int
-		receive smoker_chan[i](mess[1], mess[2], mess[3], pver)
-		# check the things we need are available
-		if mess[1] + 2*mess[2] + 3*mess[3] + my_item = 6 ->
-			write("IMA WANNA PICKUP SHIT YO ",i)
-			send agent_chan(i, pver)
-			
-			var accepted : int
-			receive smoker_reply[i](accepted)
-			
-			if accepted = 1 ->
-				# smoke
-				write("Smoker nr.",i," started smoking.")
-				nap(int(random(1000, 2000)))
-			[] else ->
-				write("Somebody stole my stuff y0 :(" , i)
-			fi
-		fi
-	od
-end
+	process Smoker(i := 1 to SMOKERS)
+		write("Starting Smoker ",i)
+		var my_item : int := ((i - 1) % 3) + 1
+		do true -> 
+			# request ingredients from agent
+			write(i, " requesting items")
+			send request_channel(my_item, i)
 
+			# wait for reply from agent
+			receive reply_channel[i]()
+				
+			# smoke for a while
+			write("Smoker ",i," started smoking.")
+			nap(int(random(1000, 3000)))
+		od
+	end
+	
 end SmokersProb
