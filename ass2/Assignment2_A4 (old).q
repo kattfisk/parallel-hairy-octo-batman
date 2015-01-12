@@ -3,12 +3,12 @@
 /*
 The agent will eventually continue to the critical section
 */
-A.Initial --> A.ItemsPlaced
+A.Initial --> A.Send
 
 /*
 The amount of tobacco on the table is 0 or 1 guaranteeing that access to the critical section is done in correct order. 
 */
-A[] A.tobacco == 0 || A.tobacco==1
+A[] A.items_on_table[0] == 0 || A.items_on_table[0] == 1
 
 /*
 This is a check for mutual exclusion between the agent and a smoker.
