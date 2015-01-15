@@ -1,26 +1,26 @@
-//This file was generated from (Commercial) UPPAAL 4.0.14 (rev. 5615), May 2014
+//This file was generated from (Academic) UPPAAL 4.0.13 (rev. 4577), September 2010
 
 /*
-The agent will eventually continue to the critical section
+The agent will eventually signal the smokers.
 */
 A.Initial --> A.BroadcastInfo
 
 /*
-The amount of tobacco on the table is 0 or 1 guaranteeing that access to the critical section is done in correct order. 
+Eventual entry
 */
-A[] A.first_item != A.second_item
+E<> S1.Smoke
 
 /*
-This is a check for mutual exclusion between the agent and a smoker.
+If items have been put on table then they are not the same.
 */
-E<> A.BroadcastInfo && S1.ReceiveBroadcast
+A[] !A.CalculateSmokerType || (A.first_item != A.second_item)
 
 /*
-
+Smoker type will always have a valid value.
 */
-E<> ! (A.smoker_type > 3) || (A.smoker_type < 1)
+A[] !((A.smoker_type > 3) && (A.smoker_type < 1))
 
 /*
 Not deadlock should be a global invariant.
 */
-A[] ! deadlock
+A[] !deadlock
