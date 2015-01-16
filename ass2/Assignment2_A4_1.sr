@@ -6,14 +6,13 @@ resource SmokersProblem()
 	const PAPER   : int := 2
 	const MATCHES : int := 3
 
-	op request_channel()					# Smokers request items
 	op broadcast_channel[3]()			# One channel per smoker type
+	op request_channel()					# Smokers request items
 	
 	process Agent
 		var items_on_table[3] : int
 		
 		write("Started Agent")
-		
 		do true ->	
 			# Clear table
 			items_on_table[TOBACCO] := 0
@@ -34,16 +33,17 @@ resource SmokersProblem()
 			smoker_type -:= items_on_table[TOBACCO] * TOBACCO
 			smoker_type -:= items_on_table[MATCHES] * MATCHES
 			
-			# Inform relevant smokers of the available items
+			# Inform relevant smoker of the available items
 			send broadcast_channel[smoker_type]()
 			
-			# Receive item request from smoker
+			# Wait for request from smoker
 			receive request_channel()
 		od
-		
 	end
 	
 	process Smoker(i := 1 to SMOKERS)
+		# Randomize start order
+		nap(int(random(10, 500)))
 		write("Started Smoker ",i)
 		do true ->
 			# Wait for message that the needed components are available
