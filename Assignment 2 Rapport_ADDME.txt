@@ -1,0 +1,38 @@
+Ändra 2.2
+
+
+Resultat 
+4.1 Implementation 
+The source code need not be included in the report since you are supposed to submit the sr files to your drop box. However, this is the place where you can discuss the code you have written. Do you have any comments to your source code? 
+
+För att leva upp till sina krav frångår andra och tredje lösningarna beskrivningen på två sätt. Agenten slumpar inte vilka resurser som läggs på bordet och agenten lägger inte upp resurserna oberoende av rökarna,  detta skulle krävt komplex kod för att hantera situationer då ingen rökare av en särskild typ finns samt skulle varit omöjligt att förena med den tredje lösningens krav på fairness och liveness.
+
+Även om den inte specifikt utformades för detta uppfyller den andra lösningen både liveness och fairness då alla rökare köar i en FIFO-kö i agentens meddelandebuffer. Därför fanns ingen anledning att skriva någon särskild kod för den tredje lösningen utan koden för den andra lösningen användes.
+
+4.2 Verifiering 
+This section contains your arguments for your solution meeting, or not meeting, the requirements. Are you confident with your solution? With what inputs did you test the program? To what extent have you used uppaal for verification? What queries did you run and what was the result of this? List your queries with the results you got from the model checker and explain what these results mean. For example: A[] !deadlock, result true, means that you have absence of deadlock. Given the verification, under what circumstances can you be sure that your program is correct? 
+
+Samtliga lösningar är enkla vilket minskar risken för fel i design, implementation eller validering.
+
+Den första lösningens korrekthet verifierades genom att den modellerades i UppAal och att följande frågor ställdes mot modellen med positivt resultat.
+
+A.Initial --> A.BroadcastInfo
+Verifierar liveness i agenten, efter att den startats kommer den kontakta en rökare.
+
+E<> (S1.Smoke || S2.Smoke || S3.Smoke)
+Verifierar att någon rökare kommer få röka.
+
+A[] !A.CalculateSmokerType || (A.first_item != A.second_item)
+Verifierar att de två resurser som läggs på bordet alltid är av olika typ.
+
+A[] !((A.smoker_type > 3) && (A.smoker_type < 1))
+Verifierar att agenten alltid kommer fram till en giltig typ på den rökare den tänker skicka till.
+
+A[] !deadlock
+Verifierar att lösningen aldrig kan hamna i deadlock.
+
+5 Diskussion 
+This section contains a discussion of whether the problem was successfully solved. Have you identified any problems with your solution? Can your solution be improved and if so how? Was it anything that surprised you during the verification? Note: it’s seldom a good approach to conclude that the program is perfect. I want to see that you can estimate your success.
+
+Första lösningarna är naiva och har varken fairness eller liveness. I lösning två är det race mellan de rökare som är av samma typ.
+Lösning tre är mycket finare och bättre på alla sätt, kortare och enklare kod, garanterad liveness och fairness (på bekostnad av att slumpmässigheten tagits bort).

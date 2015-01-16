@@ -2,12 +2,11 @@ resource SmokersProb()
 const SMOKERS : int := 6 # number of smokers
 
 const TOBACCO : int := 1
-const PAPER : int   := 2
+const PAPER   : int := 2
 const MATCHES : int := 3
 
 # One request channel for each type
 op request_channel(int; int)
-
 # One reply channel for each smoker
 op reply_channel[SMOKERS]()
 
@@ -41,20 +40,21 @@ op reply_channel[SMOKERS]()
 	end
 
 	process Smoker(i := 1 to SMOKERS)
+		# Nap to randomize start order
+		nap(int(random(100, 1000)))
 		write("Starting Smoker ",i)
 		var my_item : int := ((i - 1) % 3) + 1
 		do true -> 
-			# request ingredients from agent
+			# Request resources
 			write(i, " requesting items")
 			send request_channel(my_item, i)
 
-			# wait for reply from agent
+			# Wait for reply saying resources have been granted
 			receive reply_channel[i]()
 				
-			# smoke for a while
+			# Smoke for a while
 			write("Smoker ",i," started smoking.")
 			nap(int(random(1000, 3000)))
 		od
 	end
-	
 end SmokersProb

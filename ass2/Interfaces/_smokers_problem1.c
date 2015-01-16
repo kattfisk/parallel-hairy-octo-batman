@@ -18,9 +18,9 @@ int sr_stack_size = 40000;
 int sr_async_flag = 0;
 char sr_exec_path[] = "/software/sr-2.3.3/lib/srx";
 
-int N_SmokersProb = 0;  extern void R_SmokersProb(), F_SmokersProb();
+int N_SmokersProblem = 0;  extern void R_SmokersProblem(), F_SmokersProblem();
 
 Rpat sr_rpatt[] = {
-    { "SmokersProb", R_SmokersProb, F_SmokersProb },
+    { "SmokersProblem", R_SmokersProblem, F_SmokersProblem },
 };
 int sr_num_rpats = 1;

@@ -6,9 +6,9 @@ The agent will eventually signal the smokers.
 A.Initial --> A.BroadcastInfo
 
 /*
-Eventual entry
+Eventual entry for some smoker
 */
-E<> S1.Smoke
+E<> (S1.Smoke || S2.Smoke || S3.Smoke)
 
 /*
 If items have been put on table then they are not the same.
