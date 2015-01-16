@@ -12,8 +12,6 @@ För att leva upp till sina krav frångår andra och tredje lösningarna beskriv
 4.2 Verifiering 
 This section contains your arguments for your solution meeting, or not meeting, the requirements. Are you confident with your solution? With what inputs did you test the program? To what extent have you used uppaal for verification? What queries did you run and what was the result of this? List your queries with the results you got from the model checker and explain what these results mean. For example: A[] !deadlock, result true, means that you have absence of deadlock. Given the verification, under what circumstances can you be sure that your program is correct? 
 
-Samtliga lösningar är enkla vilket minskar risken för fel i design, implementation eller validering.
-
 Den första lösningens korrekthet verifierades genom att den modellerades i UppAal och att följande frågor ställdes mot modellen med positivt resultat.
 
 A.Initial --> A.BroadcastInfo
@@ -31,8 +29,9 @@ Verifierar att agenten alltid kommer fram till en giltig typ på den rökare den
 A[] !deadlock
 Verifierar att lösningen aldrig kan hamna i deadlock.
 
-5 Diskussion 
-This section contains a discussion of whether the problem was successfully solved. Have you identified any problems with your solution? Can your solution be improved and if so how? Was it anything that surprised you during the verification? Note: it’s seldom a good approach to conclude that the program is perfect. I want to see that you can estimate your success.
+De krav som fanns den första lösningen var mutual exklusion vid tillgång till bordet samt att lösningen ej skulle kunna hamna i deadlock. Då endast agenten har tillgång till bordet och det endast finns en agent garanteras mutual exklusion vid tillgång till bordet. Att lösningen inte kan hamna i deadlock verifierades via en förfrågning gentemot UppAal-modellen.
 
-Första lösningarna är naiva och har varken fairness eller liveness. I lösning två är det race mellan de rökare som är av samma typ.
-Lösning tre är mycket finare och bättre på alla sätt, kortare och enklare kod, garanterad liveness och fairness (på bekostnad av att slumpmässigheten tagits bort).
+Att modellen överrensstämmer med koden för första lösningen är troligt då både koden och modellen är enkla och lättförståliga. Därmed kan lösningen med tämligen stor sannolikhet sägas uppfylla de krav som ställts på den.
+
+De andra två lösningarna verifierades inte via modeller utan enbart genom testning, men även för dem bidrar deras enkelhet och förståelighet till ökat förtroende deras korrekthet.
+
