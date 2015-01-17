@@ -11,9 +11,14 @@ Eventual entry for some smoker
 E<> (S1.Smoke || S2.Smoke || S3.Smoke)
 
 /*
-If items have been put on table then they are not the same.
+There can never be more than one item of each kind on the table.
 */
-A[] !A.CalculateSmokerType || (A.first_item != A.second_item)
+A[] (A.items_on_table[TOBACCO] <= 1 && A.items_on_table[PAPER] <= 1 && A.items_on_table[MATCHES] <= 1)
+
+/*
+There can never be more than two items on the table at the same time.
+*/
+A[] (A.items_on_table[TOBACCO] + A.items_on_table[PAPER] + A.items_on_table[MATCHES]) <= 2
 
 /*
 Smoker type will always have a valid value.
